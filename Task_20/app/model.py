@@ -5,6 +5,8 @@ from tensorflow.keras import backend as K
 import cv2
 from PIL import Image
 import io
+import json
+from pathlib import Path
 
 @keras.saving.register_keras_serializable()
 class CTCLayer(keras.layers.Layer):
@@ -32,14 +34,11 @@ class OCRModel:
         )
         
         self.input_shape = (80, 500, 1) 
-        
-        self.vocab_chars = [
-            ' ', 'أ', 'إ', 'آ', 'ا', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د', 'ذ', 'ر',
-            'ز', 'س', 'ش', 'ص', 'ض', 'ط', 'ظ', 'ع', 'غ', 'ف', 'ق', 'ك', 'ل', 'م',
-            'ن', 'ه', 'و', 'ي', 'ى', 'ء', 'ئ', 'ؤ', 'ة', 'ى', '٠', '١', '٢', '٣',
-            '٤', '٥', '٦', '٧', '٨', '٩', '0', '1', '2', '3', '4', '5', '6', '7',
-            '8', '9'
-        ]
+
+
+        vocab_path = Path(__file__).resolve().parent / 'vocab.json'
+        with vocab_path.open(encoding='utf-8') as f:
+            self.vocab_chars = json.load(f)
         self.idx2char = {idx: char for idx, char in enumerate(self.vocab_chars)}
 
     def prepare_image(self, image_bytes):
